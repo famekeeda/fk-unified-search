@@ -181,8 +181,7 @@ See our [Contributing Guide](CONTRIBUTING.md) for detailed guidelines.
 
 **Ready to build production-ready AI agents?**
 
-[🚀 Start with Tutorial 1](./tutorials/01-basic-chatbot) • [📚 Browse All Tutorials](#-tutorial-categories) • [🤝 Join Our Community](#-community)
-
+[🚀 Start with Tutorial 1](./agents/dev_tools/EasyDocs) • [📚 Browse All Tutorials](#-tutorial-categories) • [🤝 Join Our Community](#-community)
 **Made with ❤️ by developers, for developers**
 
 </div>
