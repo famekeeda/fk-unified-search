@@ -12,6 +12,7 @@ Transform natural language queries into production-ready API documentation with 
   - **MCP Server**: Direct integration with Cursor, Claude Desktop, and any MCP-compatible client
 - **⚡ Real-Time Processing**: Watch each step execute live from query analysis to final documentation
 
+
 ## Demo
 
 [![EasyDocs Demo](https://img.youtube.com/vi/tfn8sSoPYl4/maxresdefault.jpg)](https://www.youtube.com/watch?v=tfn8sSoPYl4)
@@ -247,6 +248,15 @@ Main MCP tool for generating API documentation.
 - `question` (string): Natural language query about API documentation needs
 
 **Returns:** Formatted API documentation with examples and best practices
+
+
+## Tech Stack
+- **Langgraph**
+- **MCPuse**
+- **Gemini**
+- **FastMCP**
+- **Streamlit**
+
 
 ## 🐛 Troubleshooting
 
