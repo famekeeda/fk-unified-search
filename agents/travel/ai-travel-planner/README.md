@@ -138,6 +138,13 @@ ai-travel-planner/
 - 📱 Responsive web interface
 - 🎨 Modern UI with animations
 
+## Tech Stack
+- **Langgraph**
+- **MCPuse**
+- **Gemini**
+- **FastAPI**
+- **React**
+
 ## Troubleshooting
 
 ### Common Issues
