@@ -1,4 +1,4 @@
-# EasyDocs - AI-Powered API Documentation Agent
+# EasyDocs 
 
 Transform natural language queries into production-ready API documentation with our intelligent LangGraph-based agent.
 
