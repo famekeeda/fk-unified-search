@@ -1,6 +1,6 @@
-# ReadmeSeoBooster Crew
+# Readme Seo Booster
 
-Welcome to the ReadmeSeoBooster Crew project, powered by [crewAI](https://crewai.com). This template is designed to help you set up a multi-agent AI system with ease, leveraging the powerful and flexible framework provided by crewAI. Our goal is to enable your agents to collaborate effectively on complex tasks, maximizing their collective intelligence and capabilities.
+This is a crew that will help you boost your README file's SEO and visibility over the web.
 
 ## Installation
 
