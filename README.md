@@ -28,10 +28,10 @@ Transform your GenAI agent concepts into **production-ready systems** using patt
 
 ### 🔥 Why This Repository Stands Out
 
-- **📖 Code-First Learning:** Skip the theory—dive straight into working implementations
-- **🛠️ Battle-Tested Patterns:** Learn from real-world deployments and proven architectures
-- **🔄 End-to-End Coverage:** From local development to production monitoring
-- **⚡ Immediate Value:** Run tutorials in minutes, not hours
+- **📖 Code-First Learning:** Skip the theory—dive straight into working implementations.
+- **🛠️ Battle-Tested Patterns:** Learn from real-world deployments and proven architectures.
+- **🔄 End-to-End Coverage:** From local development to production monitoring.
+- **⚡ Immediate Value:** Run tutorials in minutes, not hours.
 
 ---
 
