@@ -1,6 +1,6 @@
 # TrendScan 
 
-**Multi source company intelligence platform**  automated collection and AI powered analysis of company data from Crunchbase, LinkedIn, and Reddit.
+**Multi‑source company intelligence platform** – automated collection and AI‑powered analysis of company data from Crunchbase, LinkedIn, and Reddit.
 
 ---
 
