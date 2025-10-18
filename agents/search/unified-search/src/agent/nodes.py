@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional , List
+from typing import Dict, Any, Optional, List
 from langchain_google_genai import ChatGoogleGenerativeAI
 from pydantic import BaseModel, Field
 from mcp_use.client import MCPClient
@@ -6,7 +6,92 @@ from mcp_use.adapters.langchain_adapter import LangChainAdapter
 from langgraph.prebuilt import create_react_agent
 import os
 from dotenv import load_dotenv
+import re
+
 load_dotenv()
+
+PLATFORM_HINTS = {
+    1: "site:youtube.com",
+    2: "site:instagram.com",
+}
+
+
+def _extract_geo(context: Dict[str, Any]) -> Optional[str]:
+    geography = context.get("geography") or {}
+    for key in ("influencer", "audience", "basic"):
+        locations = geography.get(key) or []
+        if locations:
+            return str(locations[0]).strip()
+    return None
+
+
+def _extract_recency_days(context: Dict[str, Any]) -> Optional[int]:
+    timeline = context.get("timeline") or []
+    for entry in timeline:
+        if not entry:
+            continue
+        lowered = str(entry).lower()
+        digits = re.findall(r"\d+", lowered)
+        if digits:
+            try:
+                value = int(digits[0])
+                return max(value, 1)
+            except ValueError:
+                continue
+        if "today" in lowered:
+            return 1
+    return None
+
+
+def policy_node(state: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Normalise inbound query/context before search nodes run.
+
+    - Derives geo from creator/audience filters.
+    - Appends platform-specific site hints to the query.
+    - Applies recency bias if recent activity filters are present.
+    """
+
+    context: Dict[str, Any] = state.get("context") or {}
+
+    # Geo preference
+    geo = state.get("geo") or _extract_geo(context)
+    if geo:
+        state["geo"] = geo
+
+    # Platform hints
+    platform_ids = context.get("platform", {}).get("ids") or []
+    platform_hints: List[str] = []
+    for pid in platform_ids:
+        hint = PLATFORM_HINTS.get(int(pid)) if isinstance(pid, (int, str)) else None
+        if hint and hint not in platform_hints:
+            platform_hints.append(hint)
+    query = state.get("query", "").strip()
+    if platform_hints and query:
+        for hint in platform_hints:
+            if hint not in query:
+                query = f"{query} {hint}".strip()
+        state["platform_hints"] = platform_hints
+        state["query"] = query
+
+    # Additional free-text keywords
+    keywords = context.get("keywords") or []
+    if keywords:
+        keyword_text = " ".join(str(kw) for kw in keywords if kw)
+        if keyword_text:
+            combined = f"{state.get('query', '').strip()} {keyword_text}".strip()
+            state["query"] = combined
+
+    # Recency bias
+    recency_days = state.get("recency_bias_days") or _extract_recency_days(context)
+    if recency_days:
+        state["recency_bias_days"] = recency_days
+
+    # Ensure max_results fallback
+    if not state.get("max_results"):
+        state["max_results"] = 5
+
+    return state
 
 class IntentClassification(BaseModel):
     """Intent classification result for search queries."""
@@ -77,6 +162,9 @@ Examples:
 
     try:
         query = state.get("query", "")
+        geo = state.get("geo")
+        recency_days = state.get("recency_bias_days")
+        max_results = state.get("max_results", 5)
         
         if not query:
             raise ValueError("No query found in state")
@@ -171,18 +259,33 @@ Be precise and only return relevant search results."""
         )
         
         # Execute search through agent
-        result = await agent.ainvoke({
-            "messages": [{
-                "role": "user", 
-                "content": f"Search for: {query}. Please provide structured search results with title, URL, description and source information for each result."
-            }]
-        })
+        instructions: List[str] = [
+            f"Search for: {query}. Please provide structured search results with title, URL, description and source information for each result.",
+            f"Return up to {max_results} high quality results."
+        ]
+        if geo:
+            instructions.append(f"Use the geo/country code `{geo}` when calling the search_engine tool.")
+        if recency_days:
+            instructions.append(f"Prefer sources published within the last {recency_days} days if available.")
+
+        result = await agent.ainvoke(
+            {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": " ".join(instructions),
+                    }
+                ]
+            }
+        )
         
         # Extract search results from agent response
         search_response = result["messages"][-1].content
         
         # Use LLM with structured output to parse results
         google_results = await parse_search_results_structured(search_response, query)
+        if max_results:
+            google_results = google_results[: max_results * 2]
         
         # Update state with Google search results
         if not state.get("raw_results"):

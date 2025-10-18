@@ -9,7 +9,13 @@ from dataclasses import dataclass
 from typing import Any, Dict, TypedDict
 from typing import Dict, Any, Literal
 from langgraph.graph import StateGraph, START, END
-from agent.nodes import intent_classifier_node, google_search_node, web_unlocker_node , final_processing_node
+from agent.nodes import (
+    policy_node,
+    intent_classifier_node,
+    google_search_node,
+    web_unlocker_node,
+    final_processing_node,
+)
 import re
 from langchain_core.runnables import RunnableConfig
 from langgraph.graph import StateGraph
@@ -29,6 +35,12 @@ class SearchState(TypedDict):
     
     # Input
     query: str
+    context: Optional[Dict[str, Any]]
+    geo: Optional[str]
+    user_locale: Optional[str]
+    max_results: Optional[int]
+    recency_bias_days: Optional[int]
+    platform_hints: Optional[List[str]]
     
     # Intent Classification Results
     intent: Optional[str]
@@ -105,13 +117,15 @@ def create_unified_search_graph() -> StateGraph:
     workflow = StateGraph(SearchState)
     
     # Add nodes
+    workflow.add_node("policy", policy_node)
     workflow.add_node("intent_classifier", intent_classifier_node)
     workflow.add_node("google_search", google_search_node)
     workflow.add_node("web_unlocker", web_unlocker_node)
     workflow.add_node("final_processing", final_processing_node)
     
     # Set entry point
-    workflow.add_edge(START, "intent_classifier")
+    workflow.add_edge(START, "policy")
+    workflow.add_edge("policy", "intent_classifier")
     
     # Add conditional routing after intent classification
     workflow.add_conditional_edges(
